@@ -6,10 +6,11 @@
 import React from 'react';
 import { DragSourceMonitor, useDrag } from 'react-dnd';
 import { v4 as uuid } from 'uuid';
+import { useEditState } from '../editElementWrapper';
 let id = 1;
 
-const Box: React.FC<any> = ({elementType ,cardList, changeCardList, children}) => {
-
+const Box: React.FC<any> = ({elementType ,cardList, changeCardList, children, accept, containerType}) => {
+    const [_, update] = useEditState()
     const style: React.CSSProperties = {
         display: 'inline-block',
         margin: 20,
@@ -18,8 +19,11 @@ const Box: React.FC<any> = ({elementType ,cardList, changeCardList, children}) =
         cursor: 'move'
     }
     const box = {
-        type: 'card',
+        // index: -1,
+        type: accept || 'card',
         elementType,
+        containerType: containerType || 'normal',
+        update
     };
     const [, drag] = useDrag({
         item: box,
@@ -33,6 +37,8 @@ const Box: React.FC<any> = ({elementType ,cardList, changeCardList, children}) =
             return box;
         },
         end(_: unknown, monitor: DragSourceMonitor) {
+            const info = monitor.getDropResult();
+            
             const uselessIndex = cardList.findIndex((item: any) => item.id === -1);
 
             /**
@@ -41,6 +47,14 @@ const Box: React.FC<any> = ({elementType ,cardList, changeCardList, children}) =
              *  2、如果否，则将占位元素删除
              */
             let newList = [...cardList];
+            if(info.update) {
+                newList.splice(uselessIndex, 1);
+                info.update({
+                    children: [{ ...monitor.getItem(), id: uuid() }]
+                });
+                changeCardList(newList);
+                return;
+            }
             console.log(monitor.getItem());
             if (monitor.didDrop()) {
                 newList.splice(uselessIndex, 1, { ...monitor.getItem(), id: uuid() });

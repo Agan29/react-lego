@@ -6,6 +6,7 @@
 import React, { useRef, useMemo } from 'react';
 import { XYCoord } from 'dnd-core';
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
+import { useEditState } from '../editElementWrapper';
 
 const svgStyle: React.CSSProperties = {
     position: 'absolute',
@@ -21,30 +22,27 @@ interface IProps {
     moveCard: (dragIndex: number, hoverIndex: number) => void;
 }
 
-const Card: React.FC<any> = ({ bg, category, index, moveCard, id, children }) => {
+const Card: React.FC<any> = ({ bg, handleSelect, index, moveCard, id, children, containerType, type }) => {
     const ref = useRef<HTMLDivElement>(null);
-
+    const [state, update] = useEditState();
+    const stateRef = useRef(state);
+    stateRef.current = state;
     const [{ isDragging }, drag, dragPreview] = useDrag({
         collect: (monitor: DragSourceMonitor) => ({
             isDragging: monitor.isDragging(),
         }),
         // item 中包含 index 属性，则在 drop 组件 hover 和 drop 是可以根据第一个参数获取到 index 值
-        item: { type: 'card', index },
+        item: { type: type || 'card', index, update, state: stateRef },
     });
-
     const [, drop] = useDrop({
-        accept: 'card',
-        hover(item: { type: string; index: number }, monitor: DropTargetMonitor) {
+        accept: ['card', 'item'],
+        hover(item: { type: string; index: number}, monitor: DropTargetMonitor) {
             if (!ref.current) {
                 return;
             }
+           
             const dragIndex = item.index;
             const hoverIndex = index;
-
-            // 拖拽元素下标与鼠标悬浮元素下标一致时，不进行操作
-            if (dragIndex === hoverIndex) {
-                return;
-            }
 
             // 确定屏幕上矩形范围
             const hoverBoundingRect = ref.current!.getBoundingClientRect();
@@ -58,6 +56,12 @@ const Card: React.FC<any> = ({ bg, category, index, moveCard, id, children }) =>
             // 获取距顶部距离
             const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
 
+            // 获取距底部距离
+            const hoverClientYBottom = (clientOffset as XYCoord).y - hoverBoundingRect.bottom + 20;
+            // 拖拽元素下标与鼠标悬浮元素下标一致时，不进行操作
+            if (dragIndex === hoverIndex) {
+                return;
+            }
             /**
              * 只在鼠标越过一半物品高度时执行移动。
              *
@@ -66,7 +70,11 @@ const Card: React.FC<any> = ({ bg, category, index, moveCard, id, children }) =>
              *
              * 可以防止鼠标位于元素一半高度时元素抖动的状况
              */
-
+            if(containerType === 'free') {
+                if (hoverClientYBottom < 0 && hoverClientY > 0) {
+                    return;
+                }
+            }
             // 向下拖动
             if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
                 return;
@@ -76,6 +84,7 @@ const Card: React.FC<any> = ({ bg, category, index, moveCard, id, children }) =>
             if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
                 return;
             }
+            
 
             // 执行 move 回调函数
             moveCard(dragIndex, hoverIndex);
@@ -89,16 +98,12 @@ const Card: React.FC<any> = ({ bg, category, index, moveCard, id, children }) =>
             }
         },
     });
-
     const style: React.CSSProperties = useMemo(() => ({
         position: 'relative',
         background: bg,
-        margin: '16px 6px',
         // Card 为占位元素是，透明度 0.4，拖拽状态时透明度 0.2，正常情况透明度为 1
         opacity: id === -1 ? 0.4 : isDragging ? 0.2 : 1,
-        padding: '20px 0px',
         verticalAlign: 40,
-        width: 288,
     }), [bg, id, isDragging]);
 
     /**
@@ -108,7 +113,7 @@ const Card: React.FC<any> = ({ bg, category, index, moveCard, id, children }) =>
     dragPreview(drop(ref));
     drag(ref);
     return (
-        <div ref={ref} style={style}>
+        <div ref={ref} style={style} onClick={handleSelect}>
             {children}
         </div>
     );

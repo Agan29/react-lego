@@ -29,12 +29,11 @@ module.exports = {
     proxy: {
       '/api': {
         target: `http://${serverBaseURL}:3000`,
-        pathRewrite: { '^/api': '' },
+        // pathRewrite: { '^/api': '' },
         changeOrigin: true,
         secure: false,
       },
     }
- 
   },
   devtool: 'eval-source-map',
   plugins: [

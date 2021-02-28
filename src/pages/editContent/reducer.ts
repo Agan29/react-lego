@@ -16,6 +16,11 @@ export default function reducer(prev = defaultState, action: any) {
             }
             case 'update_section': {
                 const { page, id, data } = action;
+                if(data.children) {
+                    const prevChildren = prev[page][id].children || [];
+                    console.log('==============> prevChildren', prevChildren);
+                    data.children = [...prevChildren, ...data.children]
+                }
                 state[page][id] = { ...prev[page][id], ...data };
                 break;
             }
