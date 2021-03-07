@@ -3,22 +3,24 @@
  * overview: 用来存放下方 Card 列表的 List 组件
  */
 
-import React, { CSSProperties, useCallback, useState, useRef } from 'react';
+import React, {
+ CSSProperties, useCallback, useState, useRef,
+} from 'react';
 import { useDrop } from 'react-dnd';
 import Card from '@components/Card';
-import {useHandleSelect} from '@components/List'
+import { useHandleSelect } from '@components/List';
 import EditElementWrapper, {
     useEditState,
 } from '@components/editElementWrapper';
 import css from './index.module.less';
+
 const style: CSSProperties = {
     backgroundColor: 'white',
-    border: '1px dashed gray',
     padding: '0 10px',
     textAlign: 'center',
     width: '100%',
     height: '100%',
-    position: 'relative'
+    position: 'relative',
 };
 
 export interface IListProps {
@@ -39,7 +41,6 @@ const FreeContainer: React.FC<IListProps> & {enable: any, defaultParams: any} = 
     const [, drop] = useDrop({
         accept: 'item',
         hover: (item, monitor) => {
-
             console.log('FreeContainer-item', item, monitor);
         },
         drop: (item, monitor) => {
@@ -49,13 +50,13 @@ const FreeContainer: React.FC<IListProps> & {enable: any, defaultParams: any} = 
             console.log(item.state);
             if (item.update) {
                 const diff = monitor.getDifferenceFromInitialOffset();
-                const offsetLeft = (item.state.current.left || 0) + diff.x //- hoverBoundingRect.x;
-                const offsetTop = (item.state.current.top || 0) + diff.y //- hoverBoundingRect.y;
+                const offsetLeft = (item.state.current.left || 0) + diff.x; // - hoverBoundingRect.x;
+                const offsetTop = (item.state.current.top || 0) + diff.y; // - hoverBoundingRect.y;
                 console.log(diff, offsetLeft, offsetTop);
                 item.update({
                     left: offsetLeft,
                     top: offsetTop,
-                    position: 'absolute'
+                    position: 'absolute',
                 });
             }
             return { update };
@@ -73,11 +74,11 @@ const FreeContainer: React.FC<IListProps> & {enable: any, defaultParams: any} = 
                 ? state.children.map((item: any, index: number) => (
                     <EditElementWrapper id={item.id} defaultProps={item.elementType.defaultProps} needResize noBorder>
                         <Card
-                            index={index}
-                            type={item.type}
-                            containerType={item.containerType}
-                            key={item.id}
-                            handleSelect={(e: any) => {
+                          index={index}
+                          type={item.type}
+                          containerType={item.containerType}
+                          key={item.id}
+                          handleSelect={(e: any) => {
                                 e.preventDefault();
                                 setTimeout(() => {
                                     handleSelect({
@@ -86,7 +87,7 @@ const FreeContainer: React.FC<IListProps> & {enable: any, defaultParams: any} = 
                                     });
                                 }, 10);
                             }}
-                            moveCard={moveCard}
+                          moveCard={moveCard}
                         >
                             <item.elementType />
                         </Card>
@@ -98,9 +99,9 @@ const FreeContainer: React.FC<IListProps> & {enable: any, defaultParams: any} = 
 };
 
 FreeContainer.enable = {
-    bottom: true
-}
-FreeContainer.defaultProps ={
-    width: '100%'
-}
+    bottom: true,
+};
+FreeContainer.defaultProps = {
+    width: '100%',
+};
 export default FreeContainer;

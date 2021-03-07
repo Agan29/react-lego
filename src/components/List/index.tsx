@@ -3,7 +3,9 @@
  * overview: 用来存放下方 Card 列表的 List 组件
  */
 
-import React, { CSSProperties, useCallback, createContext, useContext } from 'react';
+import React, {
+ CSSProperties, useCallback, createContext, useContext,
+} from 'react';
 import { useDrop } from 'react-dnd';
 import Card from '@components/Card';
 import EditElementWrapper, {
@@ -16,28 +18,25 @@ const style: CSSProperties = {
     margin: '100px auto',
     minHeight: '300px',
     textAlign: 'center',
-    overflow: 'hidden',
-    width: 300
-}
+    overflowY: 'scroll',
+    width: 300,
+};
 
 export interface IListProps {
     cardList: any[];
     changeCardList: (list: any[]) => void;
     handleSelect: (params: {id: string, editFields: string[]}) => void;
 }
-const getEditCom = (id: string, Com: React.FC<any> & {enable?: any}) =>  (
+const getEditCom = (id: string, Com: React.FC<any> & {enable?: any}) => (
     <EditElementWrapper id={id} defaultProps={Com.defaultProps} enable={Com.enable}>
         <Com />
     </EditElementWrapper>
 );
 const ListContext = createContext((params: {id: string, editFields: string[]}) => {});
-export const useHandleSelect = () => {
-    return useContext(ListContext);
-}
-const List: React.FC<IListProps> = ({cardList, changeCardList, handleSelect}) => {
-
-    const [, drop ] = useDrop({
-        accept: ['card', 'item']
+export const useHandleSelect = () => useContext(ListContext);
+const List: React.FC<IListProps> = ({ cardList, changeCardList, handleSelect }) => {
+    const [, drop] = useDrop({
+        accept: ['card', 'item'],
     });
 
     const moveCard = useCallback((dragIndex: number, hoverIndex: number) => {
@@ -49,7 +48,7 @@ const List: React.FC<IListProps> = ({cardList, changeCardList, handleSelect}) =>
         if (dragIndex === undefined) {
             const lessIndex = cardList.findIndex((item: any) => item.id === -1);
             newList.splice(lessIndex, 1);
-            newList.splice(hoverIndex, 0, { bg: "aqua", category: '放这里', id: -1 });
+            newList.splice(hoverIndex, 0, { bg: 'aqua', category: '放这里', id: -1 });
             changeCardList(newList);
         } else {
             const dragCard = cardList[dragIndex];
@@ -61,14 +60,14 @@ const List: React.FC<IListProps> = ({cardList, changeCardList, handleSelect}) =>
     }, [cardList])
     return (
         <ListContext.Provider value={handleSelect}>
-            <div style={style} ref={ drop }>
+            <div style={style} ref={drop}>
                 {
                     cardList.length <= 0 ? <div style={{ lineHeight: '60px' }}>放入组件</div>
-                : cardList.map((item: any, index: number) => <Card index={ index } type={item.type} containerType={item.containerType} key={ item.id } handleSelect={() => {handleSelect({id: item.id, editFields: item.elementType.editFields})}} moveCard={ moveCard }>{item.elementType && getEditCom(item.id, item.elementType)}</Card>)
+                : cardList.map((item: any, index: number) => <Card index={index} type={item.type} containerType={item.containerType} key={item.id} handleSelect={() => { handleSelect({ id: item.id, editFields: item.elementType.editFields }); }} moveCard={moveCard}>{item.elementType && getEditCom(item.id, item.elementType)}</Card>)
                 }
             </div>
         </ListContext.Provider>
-    )
-}
+    );
+};
 
 export default List;
