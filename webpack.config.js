@@ -45,7 +45,7 @@ const getStyleLoaders = (cssOptions, ...preProcessors) => {
                 postcssOptions: {
                     ident: 'postcss',
                     plugins: () => [
-                        require('postcss-flexbugs-fixes'),
+                        // require('postcss-flexbugs-fixes'),
                         require('postcss-preset-env')({
                             stage: 3,
                             features: {

@@ -11,6 +11,7 @@ import Layout from './layout';
 import './index.less';
 import '@css/base.less';
 import 'antd/dist/antd.less';
+
 console.log(Layout);
 const paths: string[] = ['layout/header/', 'pages/editContent/'];
 
